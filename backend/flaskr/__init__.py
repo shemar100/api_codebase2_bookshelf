@@ -135,5 +135,13 @@ def create_app(test_config=None):
             "message": "Not found"
             }), 404
 
+    @app.errorhandler()
+    def unprocessable(error):
+        return jsonify({
+         "success": False, 
+        "error": 422,
+        "message": "unprocessable"
+        }), 422
+
 
     return app
