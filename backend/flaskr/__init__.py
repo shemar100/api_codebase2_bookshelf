@@ -46,7 +46,7 @@ def create_app(test_config=None):
         selection = Book.query.order_by(Book.id).all()
         current_book = paginate_books(request, selection)
 
-        if len(selection) == 0:
+        if len(current_book) == 0:
             abort(404)
 
         return jsonify({
@@ -132,7 +132,7 @@ def create_app(test_config=None):
         return jsonify({
             "success": False, 
             "error": 404,
-            "message": "Not found"
+            "message": "resource not found"
             }), 404
 
     @app.errorhandler(422)
