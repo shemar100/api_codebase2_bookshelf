@@ -10,7 +10,7 @@ class BookTestCase(unittest.TestCase):
         """ Define test variables and intialize app """
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "bookshelf"
+        self.database_name = "bookshelf_test"
         self.database_path = "postgresql://{}:{}@{}/{}".format("postgres","Hotskull!000", "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
 
@@ -95,6 +95,24 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 405)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'method not allowed')
+
+    def test_get_book_search_with_resutls(self):
+        res = self.client().post('/books', json={'search': 'Novel'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['total_books'])
+        self.assertEqual(len(data['books']), 4)
+
+    def test_get_book_search_without_results(self):
+        res = self.client().post('/books', json={'search' : 'applejacks'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['total_books'], 0)
+        self.assertEqual(data['books'], 0)
                 
 if __name__ == "__main__":
     unittest.main()
