@@ -11,7 +11,7 @@ class BookTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "bookshelf"
-        self.database_path = "postgres://{}:{}@{}/{}".format("postgres","Hotskull!000", "localhost:5432", self.database_name)
+        self.database_path = "postgresql://{}:{}@{}/{}".format("postgres","Hotskull!000", "localhost:5432", self.database_name)
         setup_db(self.app, self.database_path)
 
         self.new_book = {
@@ -57,6 +57,44 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'bad request' )
-        
+
+    def test_delete_book(self):
+        res = self.client().delete('/books/100')
+        data = json.loads(res.data)
+
+        book = Book.query.filter(Book.id == 100).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], 100)
+        self.assertTrue(data['total_books'])
+        self.assertTrue(len(data['books']))
+        self.assertEqual(book, None)
+
+    def test_404_if_book_does_not_exist(self):
+        res = self.client().delete('/books/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
+
+    def test_create_new_book(self):
+        res = self.client().post('/books', json=self.new_book)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['created'])
+        self.assertTrue(data['books'])
+
+    def test_405_if_book_creation_not_allowed( self):
+        res = self.client().post('/books/45', json=self.new_book)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
+                
 if __name__ == "__main__":
     unittest.main()
