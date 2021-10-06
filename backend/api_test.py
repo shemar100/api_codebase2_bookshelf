@@ -96,8 +96,8 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'method not allowed')
 
-    def test_get_book_search_with_resutls(self):
-        res = self.client().post('/books', json={'search': 'Novel'})
+    def test_get_book_search_with_results(self):
+        res = self.client().post('/books', json={'search': 'ten'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -112,7 +112,7 @@ class BookTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['total_books'], 0)
-        self.assertEqual(data['books'], 0)
+        self.assertEqual(len(data['books']), 0)
                 
 if __name__ == "__main__":
     unittest.main()
